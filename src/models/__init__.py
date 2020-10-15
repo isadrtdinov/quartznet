@@ -1,2 +1,2 @@
-from .quartznet import QuartzNet
+from .quartznet import QuartzNet, quartznet
 

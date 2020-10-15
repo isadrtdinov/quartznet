@@ -42,5 +42,5 @@ class LJSpeechDataset(torch.utils.data.Dataset):
 
         audio_length = torch.tensor(audio_length, dtype=torch.int32)
         target_length = torch.tensor(target_length, dtype=torch.int32)
-        return spectogram, target, input_length, target_length
+        return waveform, target, audio_length, target_length
 

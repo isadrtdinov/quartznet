@@ -119,3 +119,12 @@ class QuartzNet(nn.Module):
             outputs = block(outputs)
         outputs = self.head(outputs)
         return outputs
+
+
+def quartznet(num_labels, params):
+    return QuartzNet(num_labels=num_labels, num_mels=params['num_mels'],
+                     num_blocks=params['num_blocks'], num_cells=params['num_cells'],
+                     input_kernel=params['input_kernel'], input_channels=params['input_channels'],
+                     head_kernel=params['head_kernel'], head_channels=params['head_channels'],
+                     block_kernels=params['block_kernels'], block_channels=params['block_channels'])
+
