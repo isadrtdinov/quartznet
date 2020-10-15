@@ -39,7 +39,7 @@ def main():
     valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=params['batch_size'])
 
     # initialize model and optimizer
-    model = quartznet(num_labels=len(alphabet.index_to_token), params)
+    model = quartznet(num_labels=len(alphabet.index_to_token), params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], weight_decay=params['weight_decay'])
 
     if params['load_model']:
