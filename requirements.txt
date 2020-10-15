@@ -1,0 +1,7 @@
+numpy
+pandas
+sklearn
+torchaudio
+librosa
+editdistance
+
