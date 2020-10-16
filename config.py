@@ -2,6 +2,10 @@ def set_params():
     params = {
         # The most important parameter
         'random_seed': 270072,
+        'verbose': True,
+
+        # Wandb configs
+        'wandb_project': 'quartznet',
 
         # Data location
         'data_root': 'data/wavs/',
