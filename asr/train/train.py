@@ -68,11 +68,12 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     for epoch in range(1, params['num_epochs'] + 1):
         train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, metrics,
                                                          train_loader, spectrogramer, params, train=True)
-        wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer})
 
         valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, metrics,
                                                          valid_loader, spectrogramer, params, train=False)
-        wandb.log({'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
+
+        wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
+                   'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
 
         torch.save({
             'model_state_dict': model.state_dict(),

@@ -15,7 +15,7 @@ cd $HOST_PATH
     --rm \
     -dit \
     --gpus all \
-    --shm-size=32G \
+    --shm-size=48G \
     --dns 217.10.39.4 --dns 8.8.8.8 \
     --privileged \
     --env="DISPLAY" \

@@ -39,7 +39,7 @@ def set_params():
 
         # Optimizer params:
         'lr': 1e-4, 'weight_decay': 1e-3,
-        'batch_size': 96, 'num_epochs': 20,
+        'batch_size': 108, 'num_epochs': 20,
     }
 
     return params
