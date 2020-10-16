@@ -3,7 +3,7 @@
 NAME=$1
 PORT=$2
 
-docker container stop -t 0 $NAME
+#docker container stop -t 0 $NAME
 
 USER_NAME=$(basename $HOME)
 echo "Run as user '$USER_NAME'"
@@ -16,6 +16,7 @@ cd $HOST_PATH
 (docker container run \
     --rm \
     -dit \
+    --gpus all \
     --dns 217.10.39.4 --dns 8.8.8.8 \
     --privileged \
     --env="DISPLAY" \

@@ -39,12 +39,16 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
         # convert audio lengths to network output lengths
         win_length = spectrogramer.transforms[0].win_length
         hop_length = spectrogramer.transforms[0].hop_length
-        batch[2] = ((batch[2] - win_length - 1) // hop_length + 3) // 2
+        batch[2] = ((batch[2] - win_length) // hop_length + 3) // 2
 
         loss, cer, wer = process_batch(model, optimizer, criterion, metrics, batch, train)
         running_loss += loss * batch[0].shape[0]
         running_cer += cer * batch[0].shape[0]
         running_wer += wer * batch[0].shape[0]
+
+    running_loss /= len(loader.dataset)
+    running_cer /= len(loader.dataset)
+    running_wer /= len(loader.dataset)
 
     return running_loss, running_cer, running_wer
 

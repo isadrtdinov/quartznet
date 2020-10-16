@@ -33,7 +33,7 @@ class LJSpeechDataset(torch.utils.data.Dataset):
 
         waveform = waveform.view(-1)
         waveform = waveform if self.transform is None else self.transform(waveform)
-        audio_length = waveform.shape[0]
+        audio_length = min(waveform.shape[0], self.max_audio_length)
         waveform = self.pad_sequence(waveform, self.max_audio_length)
 
         target = self.alphabet.string_to_indices(audio_info.transcription)
