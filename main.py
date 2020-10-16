@@ -34,7 +34,7 @@ def main():
         print('Data loaded and split')
 
     # create dataloaders
-    train_transforms = torchvision.transforms.Compose([
+    train_transform = torchvision.transforms.Compose([
         RandomPitchShift(sample_rate=params['sample_rate'], pitch_shift=params['pitch_shift']),
         GaussianNoise(scale=params['noise_scale']),
     ])
