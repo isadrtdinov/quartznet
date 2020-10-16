@@ -1,9 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 NAME=$1
 PORT=$2
-
-#docker container stop -t 0 $NAME
 
 USER_NAME=$(basename $HOME)
 echo "Run as user '$USER_NAME'"

@@ -24,6 +24,9 @@ def set_params():
         'max_audio_length': 216000,
         'max_target_length': 200,
 
+        # Augmentation params:
+        'pitch_shift': 2.0, 'noise_scale': 0.005,
+
         # QuartzNet params:
         'num_blocks': 5, 'num_cells': 5,
         'input_kernel': 33, 'input_channels': 256,

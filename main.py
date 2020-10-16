@@ -2,6 +2,8 @@ import string
 import os
 import wandb
 import torch
+import torchvision
+import torchaudio
 from config import set_params
 from asr.utils import (
     Alphabet,
@@ -12,6 +14,7 @@ from asr.utils import (
 )
 from asr.models import quartznet
 from asr.train import train
+from asr.utils.transforms import RandomPitchShift, GaussianNoise
 
 
 def main():
@@ -31,11 +34,16 @@ def main():
         print('Data loaded and split')
 
     # create dataloaders
+    train_transforms = torchvision.transforms.Compose([
+        RandomPitchShift(sample_rate=params['sample_rate'], pitch_shift=params['pitch_shift']),
+        GaussianNoise(scale=params['noise_scale']),
+    ])
+
     train_dataset = LJSpeechDataset(root=params['data_root'],
                                     labels=train_data, alphabet=alphabet,
                                     max_audio_length=params['max_audio_length'],
                                     max_target_length=params['max_target_length'],
-                                    sample_rate=params['sample_rate'])
+                                    sample_rate=params['sample_rate'], transform=train_transform)
     valid_dataset = LJSpeechDataset(root=params['data_root'],
                                     labels=valid_data, alphabet=alphabet,
                                     max_audio_length=params['max_audio_length'],
@@ -65,8 +73,8 @@ def main():
         os.mkdir(params['checkpoint_dir'])
 
     # initialize wandb
-    #wandb.init(project=params['wandb_project'])
-    #wandb.watch(model)
+    wandb.init(project=params['wandb_project'])
+    wandb.watch(model)
 
     # train
     train(model, optimizer, train_loader, valid_loader, alphabet, params)
