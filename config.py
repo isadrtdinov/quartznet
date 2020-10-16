@@ -25,7 +25,7 @@ def set_params():
         'max_target_length': 200,
 
         # QuartzNet params:
-        'num_blocks': 5, 'num_cellls': 5,
+        'num_blocks': 5, 'num_cells': 5,
         'input_kernel': 33, 'input_channels': 256,
         'head_kernel': 87, 'head_channels': 512,
         'block_kernels': (33, 39, 51, 63, 75),

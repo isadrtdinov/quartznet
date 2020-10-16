@@ -34,5 +34,5 @@ RUN ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 RUN . ~/.bashrc && conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
 
 # Requirements
-COPY requirements.txt /root/requirements.txt
-RUN . ~/.bashrc && pip install -r /root/requirements.txt
+#COPY requirements.txt /root/requirements.txt
+#RUN . ~/.bashrc && pip install -r /root/requirements.txt

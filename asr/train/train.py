@@ -4,7 +4,7 @@ import torchaudio
 import torchvision
 from torch import nn
 from ..metrics.asr_metrics import ASRMetrics
-from ..utils.tranforms import SpectogramNormalize
+from ..utils.transforms import SpectogramNormalize
 
 
 def process_batch(model, optimizer, criterion, metrics, batch, train=True):
@@ -24,21 +24,24 @@ def process_batch(model, optimizer, criterion, metrics, batch, train=True):
     return loss.item(), cer, wer
 
 
-def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, train=True):
+def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, params, train=True):
     model.train() if train else model.eval()
     running_loss, running_cer, running_wer = 0.0, 0.0, 0.0
 
     for batch in loader:
         # convert waveforms to spectrograms
         with torch.no_grad():
-            batch[0] = spectrogramer(batch[0])
+            batch[0] = spectrogramer(batch[0].to(params['device']))
+
+        # pass targets to device
+        batch[1] = batch[1].to(params['device'])
 
         # convert audio lengths to network output lengths
         win_length = spectrogramer.transforms[0].win_length
         hop_length = spectrogramer.transforms[0].hop_length
         batch[2] = ((batch[2] - win_length - 1) // hop_length + 3) // 2
 
-        loss, cer, wer = process_batch(model, optimizer, metrics, batch, train)
+        loss, cer, wer = process_batch(model, optimizer, criterion, metrics, batch, train)
         running_loss += loss * batch[0].shape[0]
         running_cer += cer * batch[0].shape[0]
         running_wer += wer * batch[0].shape[0]
@@ -50,22 +53,22 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     criterion = nn.CTCLoss()
     metrics = ASRMetrics(alphabet)
 
-    spectogramer = torchvision.transforms.Compose([
+    spectrogramer = torchvision.transforms.Compose([
         torchaudio.transforms.MelSpectrogram(
             sample_rate=params['sample_rate'],
             n_mels=params['num_mels'],
-        ),
+        ).to(params['device']),
         SpectogramNormalize(),
-    )
+    ])
 
     for epoch in range(1, params['num_epochs'] + 1):
         train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, metrics,
-                                                         train_loader, spectrogramer, train=True)
-        wand.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer})
+                                                         train_loader, spectrogramer, params, train=True)
+        #wand.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer})
 
         valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, metrics,
-                                                         valid_loader, spectrogramer, train=False)
-        wand.log({'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
+                                                         valid_loader, spectrogramer, params, train=False)
+        #wand.log({'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
 
         torch.save({
             'model_state_dict': model.state_dict(),

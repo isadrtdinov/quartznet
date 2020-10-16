@@ -12,8 +12,8 @@ setup(
     name="asr",
     version="0.0.1",
     author="isadrtdinov",
-    package_dir={"": "src"},
-    packages=find_packages("src"),
+    package_dir={"": "asr"},
+    packages=find_packages("asr"),
     install_requires=get_requirements(),
     classifiers=[
         "Programming Language :: Python :: 3",

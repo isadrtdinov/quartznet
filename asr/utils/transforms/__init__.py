@@ -1,5 +1,5 @@
 from .transforms import (
-    SpectogramNormalise,
+    SpectogramNormalize,
     RandomPitchShift,
     GaussianNoise,
     Pad,

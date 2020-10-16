@@ -19,6 +19,8 @@ def main():
     params = set_params()
     set_random_seed(params['random_seed'])
     params['device'] = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
+    if params['verbose']:
+        print('Using device', params['device'])
 
     # load and split data
     data = load_data(params['metadata_file'])
@@ -47,7 +49,7 @@ def main():
         print('Data loaders prepared')
 
     # initialize model and optimizer
-    model = quartznet(num_labels=len(alphabet.index_to_token), params).to(device)
+    model = quartznet(len(alphabet.index_to_token), params).to(params['device'])
     optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], weight_decay=params['weight_decay'])
 
     if params['load_model']:
@@ -63,8 +65,8 @@ def main():
         os.mkdir(params['checkpoint_dir'])
 
     # initialize wandb
-    wandb.init(project=params['wandb_project']
-    wandb.watch(model)
+    #wandb.init(project=params['wandb_project'])
+    #wandb.watch(model)
 
     # train
     train(model, optimizer, train_loader, valid_loader, alphabet, params)
