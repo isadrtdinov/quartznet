@@ -1,4 +1,4 @@
-import math
+import wandb
 import torch
 import torchaudio
 import torchvision
@@ -24,7 +24,7 @@ def process_batch(model, optimizer, criterion, metrics, batch, train=True):
     return loss.item(), cer, wer
 
 
-def process_epoch(model, optimizer, criterion, metrics, loader, spectogramer, train=True):
+def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, train=True):
     model.train() if train else model.eval()
     running_loss, running_cer, running_wer = 0.0, 0.0, 0.0
 
@@ -48,7 +48,7 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectogramer, tr
 
 def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     criterion = nn.CTCLoss()
-    asr_metrics = ASRMetrics(alphabet)
+    metrics = ASRMetrics(alphabet)
 
     spectogramer = torchvision.transforms.Compose([
         torchaudio.transforms.MelSpectrogram(
@@ -59,4 +59,16 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     )
 
     for epoch in range(1, params['num_epochs'] + 1):
-        pass
+        train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, metrics,
+                                                         train_loader, spectrogramer, train=True)
+        wand.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer})
+
+        valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, metrics,
+                                                         valid_loader, spectrogramer, train=False)
+        wand.log({'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
+
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            'optim_state_dict': optimizer.state_dict(),
+        }, params['checkpoint_template'].format(epoch))
+
