@@ -50,8 +50,10 @@ def main():
                                     max_target_length=params['max_target_length'],
                                     sample_rate=params['sample_rate'])
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=params['batch_size'])
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=params['batch_size'],
+                                               num_workers=params['num_workers'], shuffle=True)
+    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=params['batch_size'],
+                                               num_workers=params['num_workers'])
 
     if params['verbose']:
         print('Data loaders prepared')

@@ -2,9 +2,12 @@ def set_params():
     params = {
         # The most important parameter
         'random_seed': 270072,
-        'verbose': True,
 
-        # Wandb configs
+        # System params
+        'verbose': True,
+        'num_workers': 8,
+
+        # Wandb params
         'wandb_project': 'quartznet',
 
         # Data location
