@@ -2,8 +2,9 @@ from torch import nn
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, num_cells=5, kernel_size=33, in_channels=256,
-                 out_channels=256, norm_layer=None, activation=None):
+    def __init__(self, num_cells=5, kernel_size=33, in_channels=256, 
+                 out_channels=256, dropout_rate=0.25,
+                 norm_layer=None, activation=None):
         super(BasicBlock, self).__init__()
 
         self.num_cells = num_cells
@@ -33,7 +34,7 @@ class BasicBlock(nn.Module):
         self.cells = [build_cell(self.in_channels, self.out_channels)]
         for i in range(1, self.num_cells):
             self.cells.append(self.activation())
-            self.cells.append(nn.Dropout(p=0.25))
+            self.cells.append(nn.Dropout(p=dropout_rate))
             self.cells.append(build_cell(self.out_channels, self.out_channels))
         self.cells = nn.Sequential(*self.cells)
 
@@ -46,7 +47,7 @@ class BasicBlock(nn.Module):
             self.norm_layer(num_features=out_channels),
         )
         self.activation = self.activation()
-        self.dropout = nn.Dropout(p=0.25)
+        self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, inputs):
         outputs = inputs
@@ -62,7 +63,7 @@ class QuartzNet(nn.Module):
                  head_kernel=87, head_channels=512,
                  block_kernels=(33, 39, 51, 63, 75),
                  block_channels=(256, 256, 256, 512, 512),
-                 norm_layer=None, activation=None):
+                 dropout_rate=0.25, norm_layer=None, activation=None):
         super(QuartzNet, self).__init__()
 
         self.norm_layer = nn.BatchNorm1d if norm_layer is None else norm_layer
@@ -82,7 +83,7 @@ class QuartzNet(nn.Module):
                       kernel_size=1),
             self.norm_layer(num_features=input_channels),
             self.activation(),
-            nn.Dropout(p=0.25)
+            nn.Dropout(p=dropout_rate)
         )
 
         in_channels = input_channels
@@ -91,7 +92,7 @@ class QuartzNet(nn.Module):
             self.blocks.append(
                 BasicBlock(num_cells=self.num_cells, kernel_size=block_kernels[i],
                            in_channels=in_channels, out_channels=block_channels[i],
-                           norm_layer=self.norm_layer, activation=self.activation)
+                           dropout_rate=dropout_rate, norm_layer=self.norm_layer, activation=self.activation)
             )
             in_channels = block_channels[i]
         self.blocks = nn.Sequential(*self.blocks)
@@ -107,13 +108,13 @@ class QuartzNet(nn.Module):
                       kernel_size=1),
             self.norm_layer(num_features=head_channels),
             self.activation(),
-            nn.Dropout(p=0.25),
+            nn.Dropout(p=dropout_rate),
             # C3 Block: Conv-BN-ReLU
             nn.Conv1d(in_channels=head_channels, out_channels=2 * head_channels,
                       kernel_size=1),
             self.norm_layer(num_features=2 * head_channels),
             self.activation(),
-            nn.Dropout(p=0.25),
+            nn.Dropout(p=dropout_rate),
             # C4 Block: Pointwise Convolution
             nn.Conv1d(in_channels=2 * head_channels, out_channels=num_labels,
                       kernel_size=1)
@@ -132,5 +133,6 @@ def quartznet(num_labels, params):
                      num_blocks=params['num_blocks'], num_cells=params['num_cells'],
                      input_kernel=params['input_kernel'], input_channels=params['input_channels'],
                      head_kernel=params['head_kernel'], head_channels=params['head_channels'],
-                     block_kernels=params['block_kernels'], block_channels=params['block_channels'])
+                     block_kernels=params['block_kernels'], block_channels=params['block_channels'],
+                     dropout_rate=params['dropout_rate'])
 

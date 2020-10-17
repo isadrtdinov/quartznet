@@ -21,19 +21,39 @@ class RandomPitchShift(object):
         return torch.from_numpy(waveform)
 
 
-class Pad(object):
-    def __init__(self, size, fill=0.0):
-        if isinstance(size, (tuple, list)):
-            self.size = size
-        else:
-            self.size = (size, size)
-        self.fill = fill
+class RandomVolume(object):
+    def __init__(self, gain_db=(-50.0, 50.0)):
+        self.gain = gain_db
 
-    def __call__(self, data):
-        padded_data = torch.full(self.size, self.fill)
-        pad_size = (min(self.size[0], data.shape[0]), min(self.size[1], data.shape[1]))
-        padded_data[:pad_size[0], :pad_size[1]] = data[:pad_size[0], :pad_size[1]]
-        return padded_data
+    def __call__(self, waveform):
+        rand_gain = random.uniform(self.gain[0], self.gain[1])
+        return torch.clamp(torchaudio.functional.gain(waveform, rand_gain), -1.0, 1.0)
+
+
+class AudioNoise(object):
+    def __init__(self, scale=0.25, sample_rate=22050, examples=None):
+        self.scale = scale
+        self.sample_rate = sample_rate
+        if examples is None:
+            examples = ['brahms', 'choice', 'fishin', 'nutcracker', 'trumpet', 'vibeace']
+            self.examples = []
+
+            for example in examples:
+                waveform, sample_rate = librosa.load(librosa.example(example))
+                if sample_rate != self.sample_rate:
+                    waveform = librosa.core.resample(waveform, sample_rate, self.sample_rate)
+                self.examples.append(torch.from_numpy(waveform))
+        else:
+            self.examples = examples
+
+    def __call__(self, waveform):
+        noise = random.choice(self.examples)
+        if noise.shape[0] < waveform.shape[0]:
+            noise = noise.repeat(waveform.shape[0] // noise.shape[0] + 1)
+
+        rand_pos = random.randrange(noise.shape[0] - waveform.shape[0] + 1)
+        noise = noise[rand_pos:rand_pos + waveform.shape[0]]
+        return waveform + self.scale * noise
 
 
 class GaussianNoise(object):

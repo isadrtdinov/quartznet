@@ -14,7 +14,7 @@ from asr.utils import (
 )
 from asr.models import quartznet
 from asr.train import train
-from asr.utils.transforms import RandomPitchShift, GaussianNoise
+from asr.utils import transforms
 
 
 def main():
@@ -35,8 +35,14 @@ def main():
 
     # create dataloaders
     train_transform = torchvision.transforms.Compose([
-        RandomPitchShift(sample_rate=params['sample_rate'], pitch_shift=params['pitch_shift']),
-        GaussianNoise(scale=params['noise_scale']),
+        transforms.RandomVolume(gain_db=params['gain_db']),
+        transforms.RandomPitchShift(sample_rate=params['sample_rate'],
+                                    pitch_shift=params['pitch_shift']),
+        torchvision.transforms.RandomChoice([
+            transforms.GaussianNoise(scale=params['noise_scale']),
+            transforms.AudioNoise(scale=params['audio_scale'],
+                                  sample_rate=params['sample_rate']),
+        ]),
     ])
 
     train_dataset = LJSpeechDataset(root=params['data_root'],

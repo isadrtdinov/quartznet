@@ -1,6 +1,7 @@
 from .transforms import (
     SpectogramNormalize,
     RandomPitchShift,
+    RandomVolume,
     GaussianNoise,
-    Pad,
+    AudioNoise,
 )

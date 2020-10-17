@@ -28,6 +28,9 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
     model.train() if train else model.eval()
     running_loss, running_cer, running_wer = 0.0, 0.0, 0.0
 
+    win_length = spectrogramer.transforms[0].win_length
+    hop_length = spectrogramer.transforms[0].hop_length
+
     for batch in loader:
         # convert waveforms to spectrograms
         with torch.no_grad():
@@ -37,8 +40,6 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
         batch[1] = batch[1].to(params['device'])
 
         # convert audio lengths to network output lengths
-        win_length = spectrogramer.transforms[0].win_length
-        hop_length = spectrogramer.transforms[0].hop_length
         batch[2] = ((batch[2] - win_length) // hop_length + 3) // 2
 
         loss, cer, wer = process_batch(model, optimizer, criterion, metrics, batch, train)
@@ -51,6 +52,32 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
     running_wer /= len(loader.dataset)
 
     return running_loss, running_cer, running_wer
+
+
+def generate_examples(model, loader, spectrogramer, alphabet, params):
+    model.eval()
+    waveforms, targets, output_lengths = [], [], []
+    rand_indices = torch.randint(len(loader.dataset), size=(params['num_examples', ))
+
+    win_length = spectrogramer.transforms[0].win_length
+    hop_length = spectrogramer.transforms[0].hop_length
+
+    for rand_index in rand_indices:
+        waveform, target, input_lengths, target_length = loader.dataset[rand_index.item()]
+        waveforms.append(waveform)
+        targets.append(alphabet.indices_to_string(target[:target_length]))
+        output_lengths.append(((input_length - win_length) // hop_length + 3) // 2)
+
+    with torch.no_grad():
+        waveforms = torch.stack(waveforms).to(params['device'])
+        specs = spectrogramer(waveforms)
+        log_probs = model(specs)
+
+    predicts = []
+    for log_prob, output_length in zip(log_probs, output_lengths):
+        predicts.append(alphabet.best_path_search(log_prob, output_length))
+
+    return predicts, targets
 
 
 def train(model, optimizer, train_loader, valid_loader, alphabet, params):
@@ -72,8 +99,11 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
         valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, metrics,
                                                          valid_loader, spectrogramer, params, train=False)
 
+        predicts, targets = generate_examples(model, valid_loader, spectrogramer, alphabet, params)
+
         wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
-                   'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer})
+                   'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
+                   'ground truth': targets, 'predictions': predicts})
 
         torch.save({
             'model_state_dict': model.state_dict(),

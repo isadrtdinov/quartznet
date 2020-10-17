@@ -9,6 +9,7 @@ def set_params():
 
         # Wandb params
         'wandb_project': 'quartznet',
+        'num_examples': 5,
 
         # Data location
         'data_root': 'data/wavs/',
@@ -29,6 +30,7 @@ def set_params():
 
         # Augmentation params:
         'pitch_shift': 2.0, 'noise_scale': 0.005,
+        'gain_db': (-10.0, 30.0), 'audio_scale': 0.15,
 
         # QuartzNet params:
         'num_blocks': 5, 'num_cells': 5,
@@ -36,6 +38,7 @@ def set_params():
         'head_kernel': 87, 'head_channels': 512,
         'block_kernels': (33, 39, 51, 63, 75),
         'block_channels': (256, 256, 256, 512, 512),
+        'dropout_rate': 0.3,
 
         # Optimizer params:
         'lr': 1e-4, 'weight_decay': 1e-3,
