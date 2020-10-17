@@ -57,13 +57,13 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
 def generate_examples(model, loader, spectrogramer, alphabet, params):
     model.eval()
     waveforms, targets, output_lengths = [], [], []
-    rand_indices = torch.randint(len(loader.dataset), size=(params['num_examples', ))
+    rand_indices = torch.randint(len(loader.dataset), size=(params['num_examples'], ))
 
     win_length = spectrogramer.transforms[0].win_length
     hop_length = spectrogramer.transforms[0].hop_length
 
     for rand_index in rand_indices:
-        waveform, target, input_lengths, target_length = loader.dataset[rand_index.item()]
+        waveform, target, input_length, target_length = loader.dataset[rand_index.item()]
         waveforms.append(waveform)
         targets.append(alphabet.indices_to_string(target[:target_length]))
         output_lengths.append(((input_length - win_length) // hop_length + 3) // 2)
@@ -100,10 +100,11 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
                                                          valid_loader, spectrogramer, params, train=False)
 
         predicts, targets = generate_examples(model, valid_loader, spectrogramer, alphabet, params)
+        data = [[predicts[i], targets[i]] for i in range(params['num_examples'])]
 
         wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
                    'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
-                   'ground truth': targets, 'predictions': predicts})
+                   'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
 
         torch.save({
             'model_state_dict': model.state_dict(),

@@ -1,7 +1,7 @@
 numpy
 pandas
 torchaudio
-librosa
+librosa==0.8.0
 editdistance
 wandb
 

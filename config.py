@@ -34,15 +34,15 @@ def set_params():
 
         # QuartzNet params:
         'num_blocks': 5, 'num_cells': 5,
-        'input_kernel': 33, 'input_channels': 256,
-        'head_kernel': 87, 'head_channels': 512,
+        'input_kernel': 33, 'input_channels': 128,
+        'head_kernel': 87, 'head_channels': 256,
         'block_kernels': (33, 39, 51, 63, 75),
-        'block_channels': (256, 256, 256, 512, 512),
+        'block_channels': (128, 128, 128, 256, 256),
         'dropout_rate': 0.3,
 
         # Optimizer params:
-        'lr': 1e-4, 'weight_decay': 1e-3,
-        'batch_size': 108, 'num_epochs': 20,
+        'lr': 5e-4, 'weight_decay': 1e-3,
+        'batch_size': 208, 'num_epochs': 30,
     }
 
     return params
