@@ -18,8 +18,8 @@ def set_params():
         # Checkpoints
         'checkpoint_dir': 'checkpoints/',
         'checkpoint_template': 'checkpoints/quartznet{}.pt',
-        'model_checkpoint': 'checkponts/quartznet1.pt',
-        'load_model': False,
+        'model_checkpoint': 'checkpoints/quartznet30.pt',
+        'load_model': True,
 
         # Data processing
         'valid_ratio': 0.2,
@@ -41,8 +41,9 @@ def set_params():
         'dropout_rate': 0.3,
 
         # Optimizer params:
-        'lr': 5e-4, 'weight_decay': 1e-3,
+        'lr': 3e-4, 'weight_decay': 1e-3,
         'batch_size': 208, 'num_epochs': 30,
+        'start_epoch': 31,
     }
 
     return params

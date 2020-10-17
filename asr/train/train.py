@@ -92,7 +92,7 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
         SpectogramNormalize(),
     ])
 
-    for epoch in range(1, params['num_epochs'] + 1):
+    for epoch in range(params['start_epoch'], params['num_epochs'] + params['start_epoch']):
         train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, metrics,
                                                          train_loader, spectrogramer, params, train=True)
 
