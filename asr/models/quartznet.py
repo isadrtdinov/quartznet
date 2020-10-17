@@ -29,10 +29,11 @@ class BasicBlock(nn.Module):
                 # Normalization
                 self.norm_layer(num_features=out_channels),
             )
- 
+
         self.cells = [build_cell(self.in_channels, self.out_channels)]
         for i in range(1, self.num_cells):
             self.cells.append(self.activation())
+            self.cells.append(nn.Dropout(p=0.25))
             self.cells.append(build_cell(self.out_channels, self.out_channels))
         self.cells = nn.Sequential(*self.cells)
 
@@ -45,11 +46,13 @@ class BasicBlock(nn.Module):
             self.norm_layer(num_features=out_channels),
         )
         self.activation = self.activation()
+        self.dropout = nn.Dropout(p=0.25)
 
     def forward(self, inputs):
         outputs = inputs
         outputs = self.cells(outputs)
         outputs = self.activation(outputs + self.residual(inputs))
+        outputs = self.dropout(outputs)
         return outputs
 
 
@@ -78,7 +81,8 @@ class QuartzNet(nn.Module):
             nn.Conv1d(in_channels=num_mels, out_channels=input_channels,
                       kernel_size=1),
             self.norm_layer(num_features=input_channels),
-            self.activation()
+            self.activation(),
+            nn.Dropout(p=0.25)
         )
 
         in_channels = input_channels
@@ -103,11 +107,13 @@ class QuartzNet(nn.Module):
                       kernel_size=1),
             self.norm_layer(num_features=head_channels),
             self.activation(),
+            nn.Dropout(p=0.25),
             # C3 Block: Conv-BN-ReLU
             nn.Conv1d(in_channels=head_channels, out_channels=2 * head_channels,
                       kernel_size=1),
             self.norm_layer(num_features=2 * head_channels),
             self.activation(),
+            nn.Dropout(p=0.25),
             # C4 Block: Pointwise Convolution
             nn.Conv1d(in_channels=2 * head_channels, out_channels=num_labels,
                       kernel_size=1)
