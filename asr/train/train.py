@@ -3,11 +3,11 @@ import torch
 import torchaudio
 import torchvision
 from torch import nn
-from ..metrics.asr_metrics import ASRMetrics
+from ..metrics.asr_metrics import asr_metrics
 from ..utils.transforms import SpectogramNormalize
 
 
-def process_batch(model, optimizer, criterion, metrics, batch, train=True):
+def process_batch(model, optimizer, criterion, alphabet, batch, train=True):
     inputs, targets, output_lengths, target_lengths = batch 
     optimizer.zero_grad()
 
@@ -20,11 +20,18 @@ def process_batch(model, optimizer, criterion, metrics, batch, train=True):
             loss.backward()
             optimizer.step()
 
-    cer, wer = metrics(outputs, targets, output_lengths, target_lengths)
+    predict_strings, target_strings = [], []
+    for output, output_length in zip(outputs, output_lengths):
+        predict_strings.append(alphabet.best_path_search(output[:, :output_length]))
+
+    for target, target_length in zip(targets, target_lengths):
+        target_strings.append(alphabet.indices_to_string(target[:target_length]))
+
+    cer, wer = asr_metrics(predict_strings, target_strings)
     return loss.item(), cer, wer
 
 
-def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, params, train=True):
+def process_epoch(model, optimizer, criterion, loader, spectrogramer, alphabet, params, train=True):
     model.train() if train else model.eval()
     running_loss, running_cer, running_wer = 0.0, 0.0, 0.0
 
@@ -42,7 +49,7 @@ def process_epoch(model, optimizer, criterion, metrics, loader, spectrogramer, p
         # convert audio lengths to network output lengths
         batch[2] = ((batch[2] - win_length) // hop_length + 3) // 2
 
-        loss, cer, wer = process_batch(model, optimizer, criterion, metrics, batch, train)
+        loss, cer, wer = process_batch(model, optimizer, criterion, alphabet, batch, train)
         running_loss += loss * batch[0].shape[0]
         running_cer += cer * batch[0].shape[0]
         running_wer += wer * batch[0].shape[0]
@@ -75,14 +82,13 @@ def generate_examples(model, loader, spectrogramer, alphabet, params):
 
     predicts = []
     for log_prob, output_length in zip(log_probs, output_lengths):
-        predicts.append(alphabet.best_path_search(log_prob, output_length))
+        predicts.append(alphabet.best_path_search(log_prob[:, :output_length]))
 
     return predicts, targets
 
 
 def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     criterion = nn.CTCLoss()
-    metrics = ASRMetrics(alphabet)
 
     spectrogramer = torchvision.transforms.Compose([
         torchaudio.transforms.MelSpectrogram(
@@ -93,18 +99,19 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
     ])
 
     for epoch in range(params['start_epoch'], params['num_epochs'] + params['start_epoch']):
-        train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, metrics,
-                                                         train_loader, spectrogramer, params, train=True)
+        train_loss, train_cer, train_wer = process_epoch(model, optimizer, criterion, train_loader,
+                                                         spectrogramer, alphabet, params, train=True)
 
-        valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, metrics,
-                                                         valid_loader, spectrogramer, params, train=False)
+        valid_loss, valid_cer, valid_wer = process_epoch(model, optimizer, criterion, valid_loader,
+                                                         spectrogramer, alphabet, params, train=False)
 
-        predicts, targets = generate_examples(model, valid_loader, spectrogramer, alphabet, params)
-        data = [[predicts[i], targets[i]] for i in range(params['num_examples'])]
+        if params['use_wandb']:
+            predicts, targets = generate_examples(model, valid_loader, spectrogramer, alphabet, params)
+            data = [[predicts[i], targets[i]] for i in range(params['num_examples'])]
 
-        wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
-                   'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
-                   'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
+            wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
+                       'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
+                       'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
 
         torch.save({
             'model_state_dict': model.state_dict(),

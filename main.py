@@ -5,12 +5,15 @@ import torch
 import torchvision
 import torchaudio
 from config import set_params
-from asr.utils import (
-    Alphabet,
+from asr.utils import set_random_seed
+from asr.utils.data import (
     LJSpeechDataset,
-    set_random_seed,
     load_data,
     split_data,
+)
+from asr.utils.decoding import (
+    Alphabet,
+    LanguageModel
 )
 from asr.models import quartznet
 from asr.train import train
@@ -65,7 +68,7 @@ def main():
         print('Data loaders prepared')
 
     # initialize model and optimizer
-    model = quartznet(len(alphabet.index_to_token), params).to(params['device'])
+    model = quartznet(len(alphabet), params).to(params['device'])
     optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], weight_decay=params['weight_decay'])
 
     if params['load_model']:
@@ -81,11 +84,25 @@ def main():
         os.mkdir(params['checkpoint_dir'])
 
     # initialize wandb
-    wandb.init(project=params['wandb_project'])
-    wandb.watch(model)
+    if params['use_wandb']:
+        wandb.init(project=params['wandb_project'])
+        wandb.watch(model)
 
     # train
     train(model, optimizer, train_loader, valid_loader, alphabet, params)
+
+    # initialize language model
+    lang_model = None
+    if params['use_lang_model']:
+        lang_model = LanguageModel(alphabet)
+        if os.isfile(params['lang_model_file']):
+            lang_model.load(params['lang_model_file'])
+        else:
+            lang_model.train(train_data.transcription)
+            lang_model.save(params['lang_model_file'])
+
+    if params['validate']:
+        validate(model, valid_loader, alphabet, lang_model, params)
 
 
 if __name__ == '__main__':

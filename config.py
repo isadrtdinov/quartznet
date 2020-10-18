@@ -5,11 +5,13 @@ def set_params():
 
         # System params
         'verbose': True,
+        'validate': True,
         'num_workers': 8,
 
         # Wandb params
         'wandb_project': 'quartznet',
         'num_examples': 5,
+        'use_wanbd': True,
 
         # Data location
         'data_root': 'data/wavs/',
@@ -44,6 +46,14 @@ def set_params():
         'lr': 3e-4, 'weight_decay': 1e-3,
         'batch_size': 208, 'num_epochs': 30,
         'start_epoch': 31,
+
+        # Language model params:
+        'lang_model_file': 'lang_model.npy',
+        'use_lang_model': True,
+
+        # Beam search params
+        'num_best_beams': 20, 'lang_model_factor': 0.01,
+        'use_beam_search': True,
     }
 
     return params

@@ -1,2 +1,2 @@
-from .asr_metrics import ASRMetrics
+from .asr_metrics import asr_metrics
 
