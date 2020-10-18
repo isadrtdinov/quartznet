@@ -11,16 +11,16 @@ def set_params():
         # Wandb params
         'wandb_project': 'quartznet',
         'num_examples': 5,
-        'use_wanbd': True,
+        'use_wandb': False,
 
         # Data location
-        'data_root': 'data/wavs/',
-        'metadata_file': 'data/metadata.csv',
+        'data_root': 'ljspeech/wavs/',
+        'metadata_file': 'ljspeech/metadata.csv',
 
         # Checkpoints
         'checkpoint_dir': 'checkpoints/',
         'checkpoint_template': 'checkpoints/quartznet{}.pt',
-        'model_checkpoint': 'checkpoints/quartznet30.pt',
+        'model_checkpoint': 'checkpoints/quartznet200.pt',
         'load_model': True,
 
         # Data processing
@@ -44,15 +44,15 @@ def set_params():
 
         # Optimizer params:
         'lr': 3e-4, 'weight_decay': 1e-3,
-        'batch_size': 208, 'num_epochs': 30,
-        'start_epoch': 31,
+        'batch_size': 208, 'num_epochs': 0,
+        'start_epoch': 201,
 
         # Language model params:
         'lang_model_file': 'lang_model.npy',
         'use_lang_model': True,
 
         # Beam search params
-        'num_best_beams': 20, 'lang_model_factor': 0.01,
+        'num_best_beams': 5, 'lang_model_factor': 0.01,
         'use_beam_search': True,
     }
 

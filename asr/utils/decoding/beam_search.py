@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 from scipy.special import logsumexp
 
@@ -41,7 +42,6 @@ class BeamSearcher(object):
 
             log_prob_lang_model = self.lang_model_factor * self.lang_model.log_prob(first, second)
             beams_stats[new_beam].log_prob_text = beams_stats[old_beam].log_prob_text + log_prob_lang_model
-            print(log_prob_lang_model, beams_stats[new_beam].log_prob_text)
             beams_stats[new_beam].lang_model_applied = True
 
     def beam_search(self, log_prob):

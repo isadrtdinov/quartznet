@@ -16,7 +16,7 @@ from asr.utils.decoding import (
     LanguageModel
 )
 from asr.models import quartznet
-from asr.train import train
+from asr.train import train, validate
 from asr.utils import transforms
 
 
@@ -95,7 +95,7 @@ def main():
     lang_model = None
     if params['use_lang_model']:
         lang_model = LanguageModel(alphabet)
-        if os.isfile(params['lang_model_file']):
+        if os.path.isfile(params['lang_model_file']):
             lang_model.load(params['lang_model_file'])
         else:
             lang_model.train(train_data.transcription)

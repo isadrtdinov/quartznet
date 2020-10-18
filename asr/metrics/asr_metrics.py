@@ -4,7 +4,7 @@ import editdistance
 
 def asr_metrics(predicts, targets):
     cer, wer = [], []
-    for predict_string, target_string in zip(predicts, targets)
+    for predict_string, target_string in zip(predicts, targets):
         predict_words = predict_string.split(' ')
         target_words = target_string.split(' ')
 

@@ -1,4 +1,6 @@
+import torch
 import torchvision
+import torchaudio
 from ..utils.transforms import SpectogramNormalize
 from ..utils.decoding import BeamSearcher
 from ..metrics import asr_metrics
@@ -23,7 +25,7 @@ def validate(model, loader, alphabet, lang_model, params):
     win_length = spectrogramer.transforms[0].win_length
     hop_length = spectrogramer.transforms[0].hop_length
 
-    for inputs, targets, input_lenghts, target_lengths in loader:
+    for inputs, targets, input_lengths, target_lengths in loader:
         # convert waveforms to spectrograms
         with torch.no_grad():
             inputs = spectrogramer(inputs.to(params['device']))
@@ -50,7 +52,7 @@ def validate(model, loader, alphabet, lang_model, params):
         if params['use_beam_search']:
             predict_strings = []
             for log_prob, output_length in zip(log_probs, output_lengths):
-                predict_string.append(beam_searcher.beam_search(log_prob[:, :output_length]))
+                predict_strings.append(beam_searcher.beam_search(log_prob[:, :output_length]))
 
             cer, wer = asr_metrics(predict_strings, target_strings)
             beam_cer += cer * inputs.shape[0]
