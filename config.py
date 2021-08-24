@@ -7,7 +7,7 @@ def set_params():
         'verbose': True,
         'validate': False,
         'num_workers': 4,
-        'cuda_id': 0,
+        'cuda_id': 1,
 
         # Wandb params
         'wandb_project': 'quartznet',
@@ -28,7 +28,7 @@ def set_params():
         # Data processing
         'valid_ratio': 0.1,
         'sample_rate': 16000,
-        'num_mels': 128,
+        'num_mels': 64,
         'max_audio_length': 160000,
         'max_target_length': 200,
 
@@ -46,7 +46,7 @@ def set_params():
 
         # Optimizer params:
         'lr': 3e-4, 'weight_decay': 1e-4,
-        'batch_size': 32, 'num_epochs': 200,
+        'batch_size': 64, 'num_epochs': 100,
         'start_epoch': 1,
 
         # Language model params:

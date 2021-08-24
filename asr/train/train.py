@@ -95,7 +95,6 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
             sample_rate=params['sample_rate'],
             n_mels=params['num_mels'],
         ).to(params['device']),
-        SpectogramNormalize(),
     ])
 
     for epoch in range(params['start_epoch'], params['num_epochs'] + params['start_epoch']):
@@ -111,9 +110,9 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
 
             wandb.log({'train loss': train_loss, 'train cer': train_cer, 'train wer': train_wer,
                        'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
-                       'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
+                       'epoch': epoch, 'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
 
-        if epoch % params['chekpoint_freq'] == 0:
+        if epoch % params['checkpoint_freq'] == 0:
             torch.save({
                 'model_state_dict': model.state_dict(),
                 'optim_state_dict': optimizer.state_dict(),

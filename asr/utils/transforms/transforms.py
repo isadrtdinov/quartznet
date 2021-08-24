@@ -69,7 +69,7 @@ class SpectogramNormalize(object):
     def __init__(self, mean=-7.0, std=6.0, eps=1e-8):
         self.mean = mean
         self.std = std
-        self.eps = 1e-8
+        self.eps = eps
 
     def __call__(self, spec):
         spec = torch.log(spec + self.eps)

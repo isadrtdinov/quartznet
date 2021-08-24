@@ -26,7 +26,7 @@ class SpeechDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         audio_info = self.labels.loc[index]
-        waveform, sample_rate = torchaudio.load(self.root + audio_info.path + '.wav')
+        waveform, sample_rate = torchaudio.load(self.root + audio_info.path)
 
         if sample_rate != self.sample_rate:
             raise ValueError('Wrong sample rate!')

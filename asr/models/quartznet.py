@@ -96,7 +96,7 @@ class QuartzNet(nn.Module):
                            dropout_rate=dropout_rate, norm_layer=self.norm_layer, activation=self.activation)
             )
             self.residuals.append(
-                nn.Conv2d(in_channels=in_channels, out_channels=block_channels[i], kernel_size=1)
+                nn.Conv1d(in_channels=in_channels, out_channels=block_channels[i], kernel_size=1)
             )
             in_channels = block_channels[i]
         self.blocks = nn.ModuleList(self.blocks)
