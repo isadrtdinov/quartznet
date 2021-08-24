@@ -113,8 +113,8 @@ def train(model, optimizer, train_loader, valid_loader, alphabet, params):
                        'valid loss': valid_loss, 'valid cer': valid_cer, 'valid wer': valid_wer,
                        'examples': wandb.Table(data=data, columns=['predictions', 'ground truth'])})
 
-        torch.save({
-            'model_state_dict': model.state_dict(),
-            'optim_state_dict': optimizer.state_dict(),
-        }, params['checkpoint_template'].format(epoch))
-
+        if epoch % params['chekpoint_freq'] == 0:
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'optim_state_dict': optimizer.state_dict(),
+            }, params['checkpoint_template'].format(epoch))

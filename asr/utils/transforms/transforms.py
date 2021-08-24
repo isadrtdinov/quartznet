@@ -75,4 +75,3 @@ class SpectogramNormalize(object):
         spec = torch.log(spec + self.eps)
         spec = (spec - self.mean) / self.std
         return spec
-

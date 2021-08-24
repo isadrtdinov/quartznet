@@ -2,11 +2,11 @@ import torch
 import torchaudio
 
 
-class LJSpeechDataset(torch.utils.data.Dataset):
+class SpeechDataset(torch.utils.data.Dataset):
     def __init__(self, root, labels, alphabet,
                  max_audio_length=200000, max_target_length=100,
                  sample_rate=22050, transform=None):
-        super(LJSpeechDataset, self).__init__()
+        super(SpeechDataset, self).__init__()
         self.root = root
         self.labels = labels
         self.alphabet = alphabet

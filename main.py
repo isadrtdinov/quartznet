@@ -3,11 +3,10 @@ import os
 import wandb
 import torch
 import torchvision
-import torchaudio
 from config import set_params
 from asr.utils import set_random_seed
 from asr.utils.data import (
-    LJSpeechDataset,
+    SpeechDataset,
     load_data,
     split_data,
 )
@@ -24,14 +23,14 @@ def main():
     # set parameters and random seed
     params = set_params()
     set_random_seed(params['random_seed'])
-    params['device'] = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
+    params['device'] = torch.device("cuda:" + str(params['cuda_id']) if (torch.cuda.is_available()) else "cpu")
     if params['verbose']:
         print('Using device', params['device'])
 
     # load and split data
     data = load_data(params['metadata_file'])
     train_data, valid_data = split_data(data, params['valid_ratio'])
-    alphabet = Alphabet(tokens=string.ascii_lowercase + ' ')
+    alphabet = Alphabet(tokens='абвгдежзийклмнопрстуфхцчшщыьэюя ')
 
     if params['verbose']:
         print('Data loaded and split')
@@ -48,21 +47,23 @@ def main():
         ]),
     ])
 
-    train_dataset = LJSpeechDataset(root=params['data_root'],
-                                    labels=train_data, alphabet=alphabet,
-                                    max_audio_length=params['max_audio_length'],
-                                    max_target_length=params['max_target_length'],
-                                    sample_rate=params['sample_rate'], transform=train_transform)
-    valid_dataset = LJSpeechDataset(root=params['data_root'],
-                                    labels=valid_data, alphabet=alphabet,
-                                    max_audio_length=params['max_audio_length'],
-                                    max_target_length=params['max_target_length'],
-                                    sample_rate=params['sample_rate'])
+    train_dataset = SpeechDataset(root=params['data_root'],
+                                  labels=train_data, alphabet=alphabet,
+                                  max_audio_length=params['max_audio_length'],
+                                  max_target_length=params['max_target_length'],
+                                  sample_rate=params['sample_rate'], transform=train_transform)
+    valid_dataset = SpeechDataset(root=params['data_root'],
+                                  labels=valid_data, alphabet=alphabet,
+                                  max_audio_length=params['max_audio_length'],
+                                  max_target_length=params['max_target_length'],
+                                  sample_rate=params['sample_rate'])
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=params['batch_size'],
-                                               num_workers=params['num_workers'], shuffle=True)
+                                               num_workers=params['num_workers'],
+                                               pin_memory=True, shuffle=True)
     valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=params['batch_size'],
-                                               num_workers=params['num_workers'])
+                                               num_workers=params['num_workers'],
+                                               pin_memory=True)
 
     if params['verbose']:
         print('Data loaders prepared')
@@ -107,4 +108,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

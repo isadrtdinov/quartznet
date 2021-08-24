@@ -28,4 +28,3 @@ class Alphabet(object):
         indices = torch.unique_consecutive(indices)
         indices = indices[indices != 0]
         return self.indices_to_string(indices)
-

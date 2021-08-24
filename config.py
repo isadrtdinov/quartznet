@@ -5,29 +5,31 @@ def set_params():
 
         # System params
         'verbose': True,
-        'validate': True,
-        'num_workers': 8,
+        'validate': False,
+        'num_workers': 4,
+        'cuda_id': 0,
 
         # Wandb params
         'wandb_project': 'quartznet',
         'num_examples': 5,
-        'use_wandb': False,
+        'use_wandb': True,
 
         # Data location
-        'data_root': 'ljspeech/wavs/',
-        'metadata_file': 'ljspeech/metadata.csv',
+        'data_root': 'data/wavs/',
+        'metadata_file': 'data/metadata.csv',
 
         # Checkpoints
+        'checkpoint_freq': 10,
         'checkpoint_dir': 'checkpoints/',
         'checkpoint_template': 'checkpoints/quartznet{}.pt',
         'model_checkpoint': 'checkpoints/quartznet200.pt',
-        'load_model': True,
+        'load_model': False,
 
         # Data processing
-        'valid_ratio': 0.2,
-        'sample_rate': 22050,
+        'valid_ratio': 0.1,
+        'sample_rate': 16000,
         'num_mels': 128,
-        'max_audio_length': 216000,
+        'max_audio_length': 160000,
         'max_target_length': 200,
 
         # Augmentation params:
@@ -36,16 +38,16 @@ def set_params():
 
         # QuartzNet params:
         'num_blocks': 5, 'num_cells': 5,
-        'input_kernel': 33, 'input_channels': 128,
-        'head_kernel': 87, 'head_channels': 256,
+        'input_kernel': 33, 'input_channels': 256,
+        'head_kernel': 87, 'head_channels': 512,
         'block_kernels': (33, 39, 51, 63, 75),
-        'block_channels': (128, 128, 128, 256, 256),
+        'block_channels': (256, 256, 256, 512, 512),
         'dropout_rate': 0.3,
 
         # Optimizer params:
-        'lr': 3e-4, 'weight_decay': 1e-3,
-        'batch_size': 208, 'num_epochs': 0,
-        'start_epoch': 201,
+        'lr': 3e-4, 'weight_decay': 1e-4,
+        'batch_size': 32, 'num_epochs': 200,
+        'start_epoch': 1,
 
         # Language model params:
         'lang_model_file': 'lang_model.npy',

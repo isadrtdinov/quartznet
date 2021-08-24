@@ -88,14 +88,19 @@ class QuartzNet(nn.Module):
 
         in_channels = input_channels
         self.blocks = []
+        self.residuals = []
         for i in range(self.num_blocks):
             self.blocks.append(
                 BasicBlock(num_cells=self.num_cells, kernel_size=block_kernels[i],
                            in_channels=in_channels, out_channels=block_channels[i],
                            dropout_rate=dropout_rate, norm_layer=self.norm_layer, activation=self.activation)
             )
+            self.residuals.append(
+                nn.Conv2d(in_channels=in_channels, out_channels=block_channels[i], kernel_size=1)
+            )
             in_channels = block_channels[i]
-        self.blocks = nn.Sequential(*self.blocks)
+        self.blocks = nn.ModuleList(self.blocks)
+        self.residuals = nn.ModuleList(self.residuals)
 
         # padding = 'same' for stride = 1, dilation = 2
         head_padding = head_kernel - 1
@@ -122,8 +127,8 @@ class QuartzNet(nn.Module):
 
     def forward(self, inputs):
         outputs = self.input(inputs)
-        for block in self.blocks:
-            outputs = block(outputs)
+        for block, residual in zip(self.blocks, self.residuals):
+            outputs = block(outputs) + residual(outputs)
         outputs = self.head(outputs)
         return outputs
 
@@ -135,4 +140,3 @@ def quartznet(num_labels, params):
                      head_kernel=params['head_kernel'], head_channels=params['head_channels'],
                      block_kernels=params['block_kernels'], block_channels=params['block_channels'],
                      dropout_rate=params['dropout_rate'])
-

@@ -4,10 +4,7 @@ import numpy as np
 
 
 def load_data(filename):
-    data = pd.read_csv(filename, sep='|', header=None)
-    data = data.drop(columns=[1]).dropna()
-    data.columns = ['path', 'transcription']
-
+    data = pd.read_csv(filename, sep='|')
     translator = str.maketrans('', '', string.punctuation)
     data.transcription = data.transcription.apply(
         lambda string: string.lower().translate(translator)
