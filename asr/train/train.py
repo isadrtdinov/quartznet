@@ -7,6 +7,9 @@ from ..metrics.asr_metrics import asr_metrics
 from ..utils.transforms import SpectogramNormalize
 
 
+train_step = 0
+
+
 def process_batch(model, optimizer, criterion, alphabet, batch, train=True):
     inputs, targets, output_lengths, target_lengths = batch 
     optimizer.zero_grad()
@@ -34,6 +37,7 @@ def process_batch(model, optimizer, criterion, alphabet, batch, train=True):
 def process_epoch(model, optimizer, criterion, loader, spectrogramer, alphabet, params, train=True):
     model.train() if train else model.eval()
     running_loss, running_cer, running_wer = 0.0, 0.0, 0.0
+    global train_step
 
     win_length = spectrogramer.transforms[0].win_length
     hop_length = spectrogramer.transforms[0].hop_length
@@ -53,6 +57,12 @@ def process_epoch(model, optimizer, criterion, loader, spectrogramer, alphabet, 
         running_loss += loss * batch[0].shape[0]
         running_cer += cer * batch[0].shape[0]
         running_wer += wer * batch[0].shape[0]
+
+        if train:
+            train_step += 1
+            if params['use_wandb'] and train_step % params['log_freq'] == 0:
+                wandb.log({'train loss': loss, 'train cer': cer,
+                           'train wer': wer, 'train step': train_step})
 
     running_loss /= len(loader.dataset)
     running_cer /= len(loader.dataset)

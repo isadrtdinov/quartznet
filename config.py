@@ -13,6 +13,7 @@ def set_params():
         'wandb_project': 'quartznet',
         'num_examples': 10,
         'use_wandb': True,
+        'log_freq': 100,
 
         # Data location
         'data_root': 'data/wavs/',
@@ -30,7 +31,7 @@ def set_params():
         'sample_rate': 16000,
         'num_mels': 64,
         'max_audio_length': 120000,
-        'max_target_length': 250,
+        'max_target_length': 200,
 
         # Augmentation params:
         'pitch_shift': 2.0, 'noise_scale': 0.005,
