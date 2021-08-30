@@ -11,7 +11,7 @@ def set_params():
 
         # Wandb params
         'wandb_project': 'quartznet',
-        'num_examples': 5,
+        'num_examples': 10,
         'use_wandb': True,
 
         # Data location
@@ -29,8 +29,8 @@ def set_params():
         'valid_ratio': 0.1,
         'sample_rate': 16000,
         'num_mels': 64,
-        'max_audio_length': 160000,
-        'max_target_length': 200,
+        'max_audio_length': 120000,
+        'max_target_length': 250,
 
         # Augmentation params:
         'pitch_shift': 2.0, 'noise_scale': 0.005,
@@ -42,11 +42,11 @@ def set_params():
         'head_kernel': 87, 'head_channels': 512,
         'block_kernels': (33, 39, 51, 63, 75),
         'block_channels': (256, 256, 256, 512, 512),
-        'dropout_rate': 0.3,
+        'dropout_rate': 0.2,
 
         # Optimizer params:
-        'lr': 3e-4, 'weight_decay': 1e-4,
-        'batch_size': 64, 'num_epochs': 100,
+        'lr': 3e-4, 'weight_decay': 1e-5,
+        'batch_size': 32, 'num_epochs': 100,
         'start_epoch': 1,
 
         # Language model params:
